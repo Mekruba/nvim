@@ -167,10 +167,23 @@ return {
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
+        clangd = {
+          on_attach = function(client, bufnr)
+            -- Enable formatting on save if supported by the server
+            if client.server_capabilities.documentFormattingProvider then
+              vim.api.nvim_create_autocmd('BufWritePre', {
+                group = vim.api.nvim_create_augroup('LspFormatting', { clear = true }),
+                buffer = bufnr,
+                callback = function()
+                  vim.lsp.buf.format { async = false }
+                end,
+              })
+            end
+          end,
+        },
         -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
+        pyright = {},
+        rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
